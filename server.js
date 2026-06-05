@@ -83,6 +83,23 @@ app.post('/recipes', (req, res) => {
   );
 });
 
+// Delete a recipe by id
+app.delete('/recipes/:id', (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ error: 'Invalid id' });
+  }
+  db.run('DELETE FROM recipes WHERE id = ?', [id], function(err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
+    res.json({ deletedId: id });
+  });
+});
+
 const PORT = process.env.PORT || 5001; // use 5001 to avoid macOS AirPlay/Bonjour conflicts on 5000
 const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
